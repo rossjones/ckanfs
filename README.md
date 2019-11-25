@@ -23,3 +23,10 @@ download or install via Homebrew.
 
 ## Running CKANfs
 
+```
+mkdir /tmp/ckan
+ckanfs https://myckanhost /tmp/ckan
+```
+
+If it gets in a tizz, you may need for force unmount the folder, which is either
+`umount -f /tmp/ckan` or `diskutil unmount /tmp/ckan` depending on your OS.
