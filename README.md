@@ -1,7 +1,18 @@
 
 # CKANfs
 
-CKAN as a filesystem. Not a particularly great idea...
+CKAN as a filesystem. Not a particularly great idea... but fun.
+
+I wanted to know what it would be like if you could mount a CKAN instance into
+a local folder, /tmp/ckan in the examples below.
+
+Once mounted, each organisation in CKAN shows up as a folder, within which are
+shown each dataset as another folder.  Each dataset then contains one file entry
+for each resource, the contents of which _should_ be the contents of the resource's
+URL.
+
+Currently this relies on the requests_cache library to avoid making too many requests
+to the CKAN instance.
 
 
 ## Install CKANfs

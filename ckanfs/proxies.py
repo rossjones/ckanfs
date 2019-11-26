@@ -4,6 +4,7 @@ from stat import S_IFDIR, S_IFREG
 from time import time
 from os import getuid, getgid, path
 
+import requests
 import requests_cache
 
 requests_cache.install_cache("thecache")
@@ -101,6 +102,8 @@ def _find_resource_name(resource):
     name, ext = path.splitext(fullname)
     if not ext:
         name = name + "." + resource["format"].lower()
+    else:
+        name = fullname
     return name
 
 
@@ -109,6 +112,7 @@ class ResourceProxy(Proxy):
         self.resource_name = resource_name
         super(ResourceProxy, self).__init__(host)
 
+        self.resource_dict = {}
         dataset = self.ckan.action.package_show(id=dataset_name)
         for resource in dataset["resources"]:
             name = _find_resource_name(resource)
@@ -116,16 +120,40 @@ class ResourceProxy(Proxy):
                 self.resource_dict = resource
                 break
 
+        print(f'Resource dict for {resource_name} is {self.resource_dict}')
+
+
     def attributes(self):
         return {
             **self.default_attributes_folder(),
             **{
-                "st_mode": (S_IFDIR | 0o700),
+                "st_mode": (S_IFREG | 0o700),
                 "st_atime": float(time()),
                 "st_mtime": float(time()),
-                "st_size": 110,
+                "st_size": self.size(),
             },
         }
+
+    def size(self):
+        if not self.resource_dict:
+            return 0
+
+        r = requests.get(self.resource_dict['url'])
+        if r.status_code != 200:
+            return 0
+        return int(r.headers.get('content-length', 0))
+
+
+    def data(self, offset, size):
+        # This is going to get called many times and
+        # so we are very dependent on the caching of
+        # the request.  Would be nicer to know whether
+        # range headers were supported.
+        r = requests.get(self.resource_dict['url'])
+        if r.status_code != 200:
+            return b''
+
+        return r.content[offset:offset+size]
 
     def names(self):
         raise "Should not be called"

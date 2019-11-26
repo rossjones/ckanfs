@@ -24,15 +24,14 @@ class CKANFilesystem(LoggingMixIn, Operations):
     def statfs(self, path):
         return {
             "f_namemax": 255,
-            "f_frsize": 512,
-            "f_bsize": 1024,
+            "f_frsize": 2048,
+            "f_bsize": 4096,
             "f_flag": 1,  # ST_RDONLY
         }
 
     def read(self, path, size, offset, fh):
-        # TODO: Build a resource proxy, determine the size of the content
-        # and then return it as offset:offset+size chunks as this is called
-        pass
+        p = self.factory.build_proxy(path)
+        return p.data(offset, size)
 
     def readdir(self, path, fh):
         p = self.factory.build_proxy(path)
