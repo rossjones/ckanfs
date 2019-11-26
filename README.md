@@ -12,7 +12,8 @@ for each resource, the contents of which _should_ be the contents of the resourc
 URL.
 
 Currently this relies on the requests_cache library to avoid making too many requests
-to the CKAN instance.
+to the CKAN instance. Particularly when reading resource (urls), getting the dataset/resource
+and remote URL happens several times so needs optimising to remember state.
 
 
 ## Install CKANfs
