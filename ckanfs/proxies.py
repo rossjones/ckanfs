@@ -4,6 +4,8 @@ from stat import S_IFDIR, S_IFREG
 from time import time
 from os import getuid, getgid, path
 
+from datetime import datetime
+import dateparser
 import requests
 import requests_cache
 
@@ -83,8 +85,9 @@ class OrgProxy(Proxy):
 
 class DatasetProxy(Proxy):
     def __init__(self, host, dataset_name):
-        self.dataset_name = dataset_name
         super(DatasetProxy, self).__init__(host)
+
+        self.dataset_name = dataset_name
 
     def attributes(self):
         return {
@@ -120,19 +123,27 @@ class ResourceProxy(Proxy):
                 self.resource_dict = resource
                 break
 
-        print(f'Resource dict for {resource_name} is {self.resource_dict}')
-
-
     def attributes(self):
         return {
             **self.default_attributes_folder(),
             **{
                 "st_mode": (S_IFREG | 0o700),
                 "st_atime": float(time()),
-                "st_mtime": float(time()),
+                "st_mtime": float(self.last_modified()),
                 "st_size": self.size(),
             },
         }
+
+    def last_modified(self):
+        if not self.resource_dict:
+            return time()
+
+        dt = self.resource_dict['last_modified']
+        if not dt:
+            dt = self.resource_dict['created']
+
+        date = dateparser.parse(dt)
+        return datetime.timestamp(date)
 
     def size(self):
         if not self.resource_dict:

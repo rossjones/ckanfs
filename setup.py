@@ -8,7 +8,8 @@ setup(
     long_description=open('README.md').read(),
     install_requires=[
       'fusepy>=3.0',
-      'ckanapi>=4.3'
+      'ckanapi>=4.3',
+      'dateparser>=0.7'
     ],
     scripts=['bin/ckanfs'],
 )
